@@ -9,539 +9,145 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        .quiz-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
         }
         .answer-btn {
-            transition: background-color 0.3s, transform 0.2s;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
         .answer-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            border-color: #38bdf8; /* sky-400 */
         }
         .correct {
-            background-color: #22c55e !important; /* green-500 */
+            background-color: #10b981 !important; /* emerald-500 */
             color: white !important;
-            border-color: #16a34a !important; /* green-600 */
+            border-color: #059669 !important; /* emerald-600 */
         }
         .incorrect {
-            background-color: #ef4444 !important; /* red-500 */
+            background-color: #f43f5e !important; /* rose-500 */
             color: white !important;
-            border-color: #dc2626 !important; /* red-600 */
+            border-color: #e11d48 !important; /* rose-600 */
         }
         .disabled {
             pointer-events: none;
-            opacity: 0.9;
+            opacity: 0.95;
+        }
+        #start-btn, #restart-btn {
+             background: #0ea5e9; /* sky-500 */
+        }
+        #start-btn:hover, #restart-btn:hover {
+            background: #0284c7; /* sky-600 */
+        }
+        #next-btn {
+            background: #475569; /* slate-600 */
+        }
+        #next-btn:hover {
+            background: #334155; /* slate-700 */
         }
     </style>
 </head>
-<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
-    <div id="quiz-container" class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 md:p-8">
-        <div id="start-screen">
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 text-center mb-4">Somatologie Lernüberprüfung</h1>
-            <p class="text-slate-600 text-center mb-8">Testen Sie Ihr Wissen mit 46 Fragen basierend auf Ihrem Skript. Klicken Sie auf "Quiz starten", um zu beginnen.</p>
-            <button id="start-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-lg">Quiz starten</button>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="quiz-container" class="w-full max-w-3xl quiz-container rounded-2xl shadow-xl p-6 md:p-10">
+        <div id="start-screen" class="text-center">
+            <svg class="w-20 h-20 mx-auto mb-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.154 11.385A8.002 8.002 0 0112 4.002a8.002 8.002 0 017.846 7.383m-15.692 0A8.002 8.002 0 0012 19.998a8.002 8.002 0 007.846-7.383"></path></svg>
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-3">Lernüberprüfung Somatologie</h1>
+            <p class="text-slate-500 text-base md:text-lg mb-8">Bereit, Ihr Wissen zu testen? 46 Fragen warten auf Sie.</p>
+            <button id="start-btn" class="w-full sm:w-auto text-white font-bold py-3 px-12 rounded-full hover:shadow-lg transition-all duration-300 text-lg">Quiz starten</button>
         </div>
 
         <div id="quiz-screen" class="hidden">
             <div class="mb-6">
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-sm font-semibold text-blue-600">Frage <span id="question-number"></span> von 46</p>
-                    <p id="score" class="text-sm font-semibold text-slate-600">Punkte: 0</p>
+                <div class="flex justify-between items-center mb-2 text-slate-600">
+                    <p class="text-sm font-semibold">Frage <span id="question-number"></span> / 46</p>
+                    <p id="score" class="text-sm font-semibold">Punkte: 0</p>
                 </div>
-                 <div class="bg-slate-200 rounded-full h-2.5 w-full">
-                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%;"></div>
+                 <div class="bg-slate-200 rounded-full h-3 w-full overflow-hidden">
+                    <div id="progress-bar" class="bg-sky-500 h-3 rounded-full transition-all duration-500" style="width: 0%;"></div>
                 </div>
             </div>
             
-            <h2 id="question-text" class="text-xl md:text-2xl font-bold text-slate-800 mb-6 min-h-[100px]"></h2>
+            <h2 id="question-text" class="text-xl md:text-2xl font-bold text-slate-900 mb-8 text-center min-h-[100px] flex items-center justify-center"></h2>
 
-            <div id="answer-buttons" class="grid grid-cols-1 gap-4">
-                <!-- Answer buttons will be inserted here -->
+            <div id="answer-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Answer buttons will be generated here -->
             </div>
 
-            <div id="explanation-container" class="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200 hidden">
-                <h3 class="font-bold text-slate-800 mb-2">Erklärung:</h3>
+            <div id="explanation-container" class="mt-8 p-5 bg-slate-50 rounded-lg border-l-4 hidden">
+                <h3 id="explanation-title" class="font-bold text-lg mb-2 flex items-center"></h3>
                 <p id="explanation-text" class="text-slate-700"></p>
             </div>
 
-            <button id="next-btn" class="w-full bg-slate-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-900 transition-colors duration-300 mt-8 hidden">Nächste Frage</button>
+            <div class="text-center">
+                <button id="next-btn" class="w-full sm:w-auto text-white font-bold py-3 px-12 rounded-full hover:shadow-lg transition-all duration-300 mt-8 hidden">Nächste Frage</button>
+            </div>
         </div>
 
         <div id="end-screen" class="hidden text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Quiz beendet!</h1>
-            <p class="text-slate-600 text-lg mb-6">Ihr Endergebnis:</p>
-            <p id="final-score" class="text-5xl font-extrabold text-blue-600 mb-8"></p>
-            <button id="restart-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300">Nochmal versuchen</button>
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">Quiz abgeschlossen!</h1>
+            <p class="text-slate-500 text-lg mb-6">Sehr gut gemacht! Hier ist Ihr Ergebnis:</p>
+            <div class="my-8">
+                <p id="final-score" class="text-6xl font-extrabold text-sky-500"></p>
+                <p class="text-slate-600 mt-1">richtige Antworten</p>
+            </div>
+            <button id="restart-btn" class="w-full sm:w-auto text-white font-bold py-3 px-12 rounded-full hover:shadow-lg transition-all duration-300">Nochmal versuchen</button>
         </div>
     </div>
 
     <script>
         const quizData = [
             // FROM SCRIPT: !!SOMATOLOGIE KOSMETIK Kopie.pdf
-            {
-                question: "Wie viel Blut besitzt ein erwachsener Mensch circa?",
-                answers: [
-                    { text: "Ca. 5-7 Liter", correct: true },
-                    { text: "Ca. 2-3 Liter", correct: false },
-                    { text: "Ca. 8-10 Liter", correct: false },
-                    { text: "Ca. 1-2 Liter", correct: false }
-                ],
-                explanation: "Je nach Größe und Gewicht besitzt ein erwachsener Mensch circa 5-7 Liter Blut."
-            },
-            {
-                question: "Was versteht man unter Blutplasma?",
-                answers: [
-                    { text: "Der flüssige Bestandteil des Blutes", correct: true },
-                    { text: "Die roten Blutkörperchen", correct: false },
-                    { text: "Die weißen Blutkörperchen", correct: false },
-                    { text: "Ein Gerinnungsfaktor", correct: false }
-                ],
-                explanation: "Blut besteht zu 55% aus Blutplasma. Das Blutplasma ist der flüssige Bestandteil des Blutes und besteht zu 90% aus Wasser und zu 10% aus gelösten Stoffen."
-            },
-            {
-                question: "Nennen Sie die drei Zellreihen des Blutes (Deutsch und Latein)!",
-                answers: [
-                    { text: "Erythrozyten (rote), Leukozyten (weiße), Thrombozyten (Plättchen)", correct: true },
-                    { text: "Plasma, Serum, Fibrinogen", correct: false },
-                    { text: "Arterien, Venen, Kapillaren", correct: false },
-                    { text: "Lymphozyten, Monozyten, Granulozyten", correct: false }
-                ],
-                explanation: "Man unterscheidet zwischen den roten Blutkörperchen (Erythrozyten), den weißen Blutkörperchen (Leukozyten) und den Blutplättchen (Thrombozyten)."
-            },
-            {
-                question: "Wo werden die Zellen des Blutes gebildet?",
-                answers: [
-                    { text: "Im roten Knochenmark", correct: true },
-                    { text: "In der Leber", correct: false },
-                    { text: "In der Milz", correct: false },
-                    { text: "Im Herzen", correct: false }
-                ],
-                explanation: "Alle Blutzellen entstehen im roten Knochenmark aus einer gemeinsamen Stammzelle. Diesen Prozess nennt man Hämatopoese."
-            },
-            {
-                question: "Welche Aufgabe erfüllen die Erythrozyten im menschlichen Körper?",
-                answers: [
-                    { text: "Sauerstofftransport", correct: true },
-                    { text: "Immunabwehr", correct: false },
-                    { text: "Blutgerinnung", correct: false },
-                    { text: "Hormonproduktion", correct: false }
-                ],
-                explanation: "Die roten Blutkörperchen (Erythrozyten) enthalten das Hämoglobin, welches den Sauerstoff aus der Lunge in das Gewebe und den Kohlendioxid aus dem Gewebe in die Lunge transportiert."
-            },
-            {
-                question: "Welche Aufgabe erfüllen die Leukozyten im menschlichen Körper?",
-                answers: [
-                    { text: "Immunabwehr", correct: true },
-                    { text: "Sauerstofftransport", correct: false },
-                    { text: "Nährstoffspeicherung", correct: false },
-                    { text: "Wärmeregulation", correct: false }
-                ],
-                explanation: "Die Aufgabe der Leukozyten ist die unspezifische sowie die spezifische Immunabwehr."
-            },
-            {
-                question: "Welche Aufgabe erfüllen die Thrombozyten im menschlichen Körper?",
-                answers: [
-                    { text: "Blutgerinnung und Blutstillung", correct: true },
-                    { text: "Transport von Abfallstoffen", correct: false },
-                    { text: "Bekämpfung von Viren", correct: false },
-                    { text: "Bildung von Antikörpern", correct: false }
-                ],
-                explanation: "Thrombozyten spielen bei der Blutgerinnung eine wichtige Rolle, indem sie mit Hilfe der Gerinnungsfaktoren für die Blutstillung sorgen."
-            },
-            {
-                question: "Welche Hauteffloreszenz sehen Sie an der Hautoberfläche nach abgeschlossener Blutstillung und Blutgerinnung?",
-                answers: [
-                    { text: "Kruste (Crusta)", correct: true },
-                    { text: "Pustel (Pustula)", correct: false },
-                    { text: "Quaddel (Urtica)", correct: false },
-                    { text: "Narbe (Cicatrix)", correct: false }
-                ],
-                explanation: "Nach abgeschlossener Blutstillung und Blutgerinnung sieht man die Sekundäreffloreszenz Kruste (Crusta)."
-            },
-            {
-                question: "Definition des Begriffes Thrombose?",
-                answers: [
-                    { text: "Die Bildung eines Blutgerinnsels in einem Blutgefäß", correct: true },
-                    { text: "Eine Erweiterung der Venen", correct: false },
-                    { text: "Eine Entzündung der Arterienwand", correct: false },
-                    { text: "Ein Mangel an roten Blutkörperchen", correct: false }
-                ],
-                explanation: "Als Thrombose bezeichnet man die Bildung eines Blutgerinnsels (Thrombus) innerhalb eines Blutgefäßes."
-            },
-            {
-                question: "Welcher der folgenden Faktoren ist KEIN Risikofaktor für eine Thromboseentstehung?",
-                answers: [
-                    { text: "Regelmäßige Bewegung", correct: true },
-                    { text: "Rauchen", correct: false },
-                    { text: "Schwangerschaft", correct: false },
-                    { text: "Übergewicht", correct: false }
-                ],
-                explanation: "Risikofaktoren sind u.a. Blutgerinnungsstörungen, Schwangerschaft, Rauchen, Übergewicht, lange Reisen und Bettruhe. Regelmäßige Bewegung fördert den Blutfluss und senkt das Risiko."
-            },
-            {
-                question: "Was ist der Hauptzweck des großen Kreislaufs (Körperkreislauf)?",
-                answers: [
-                    { text: "Versorgung der Körperzellen mit Sauerstoff", correct: true },
-                    { text: "Anreicherung des Blutes mit Sauerstoff in der Lunge", correct: false },
-                    { text: "Filterung des Blutes in den Nieren", correct: false },
-                    { text: "Transport von Lymphe", correct: false }
-                ],
-                explanation: "Der Körperkreislauf nimmt seinen Ursprung in der linken Herzkammer und pumpt sauerstoffreiches Blut in den Körper, um die Zellen mit Sauerstoff und Nährstoffen zu versorgen."
-            },
-            {
-                question: "Wo beginnt der Lungenkreislauf (kleiner Kreislauf)?",
-                answers: [
-                    { text: "In der rechten Herzkammer", correct: true },
-                    { text: "In der linken Herzkammer", correct: false },
-                    { text: "Im rechten Vorhof", correct: false },
-                    { text: "In den Lungenvenen", correct: false }
-                ],
-                explanation: "Der Lungenkreislauf nimmt seinen Ursprung in der rechten Herzkammer. Durch die Herzkontraktion wird das sauerstoffarme Blut über die Lungenarterie in die Lungenkapillaren gepumpt."
-            },
-            {
-                question: "Wo sammelt sich das venöse Blut aus Kopf, Nacken und Armen?",
-                answers: [
-                    { text: "In der oberen Hohlvene (Vena cava superior)", correct: true },
-                    { text: "In der unteren Hohlvene (Vena cava inferior)", correct: false },
-                    { text: "In der Aorta", correct: false },
-                    { text: "In der Pfortader", correct: false }
-                ],
-                explanation: "Die obere Hohlvene (vena cava superior) transportiert das sauerstoffarme Blut aus Kopf, Nacken und Armen zum Herzen."
-            },
-            {
-                question: "Was ist ein wesentliches Merkmal von Venen, das Arterien nicht haben?",
-                answers: [
-                    { text: "Venenklappen", correct: true },
-                    { text: "Eine dicke Muskelschicht", correct: false },
-                    { text: "Ein spürbarer Pulsschlag", correct: false },
-                    { text: "Sauerstoffreiches Blut im Körperkreislauf", correct: false }
-                ],
-                explanation: "Venen besitzen Venenklappen, die dafür sorgen, dass das Blut nur Richtung Herz fließt und nicht durch die Schwerkraft zurücksackt."
-            },
-            {
-                question: "Wie gelangen Stoffe vom Blut ins Gewebe?",
-                answers: [
-                    { text: "Durch Stoffaustausch in den Kapillaren", correct: true },
-                    { text: "Durch direkte Diffusion durch die Arterienwand", correct: false },
-                    { text: "Ausschließlich über das Lymphsystem", correct: false },
-                    { text: "Durch aktive Pumpen in den Venen", correct: false }
-                ],
-                explanation: "In den Kapillaren findet der Stoffaustausch zwischen Blut und Gewebe statt. Aufgrund des Drucks werden Wasser und niedermolekulare Stoffe in das Gewebe gepresst."
-            },
-            {
-                question: "Welcher Faktor trägt NICHT zum venösen Blutrückfluss zum Herzen bei?",
-                answers: [
-                    { text: "Der hohe Druck in den Kapillaren", correct: true },
-                    { text: "Die Muskelpumpen (z.B. Wadenmuskelpumpe)", correct: false },
-                    { text: "Die Atmung (Unterdruck im Brustraum)", correct: false },
-                    { text: "Die Venenklappen", correct: false }
-                ],
-                explanation: "Der venöse Blutrückfluss wird durch die Pulswelle der Arterien, die Venenklappen, die Muskelpumpen und die Atmung unterstützt. Der Druck in den Kapillaren ist für den Stoffaustausch, nicht den Rückfluss in den großen Venen, relevant."
-            },
-            {
-                question: "Was versteht man unter dem Begriff Varizen?",
-                answers: [
-                    { text: "Erweiterte Venen (Krampfadern)", correct: true },
-                    { text: "Verengte Arterien", correct: false },
-                    { text: "Entzündete Lymphknoten", correct: false },
-                    { text: "Ein Blutgerinnsel", correct: false }
-                ],
-                explanation: "Varizen sind Krampfadern bzw. erweiterte, oft geschlängelte Venen, bei denen die Venenklappen ihre Funktion verloren haben."
-            },
-            {
-                question: "Wo treten Varizen am häufigsten auf?",
-                answers: [
-                    { text: "An den Beinen", correct: true },
-                    { text: "An den Armen", correct: false },
-                    { text: "In der Speiseröhre", correct: false },
-                    { text: "Im Gesicht", correct: false }
-                ],
-                explanation: "Die Prädilektionsstelle (bevorzugter Ort) für Varizen sind die Beine (Ober-/Unterschenkel)."
-            },
-            {
-                question: "Wie heißt der lateinische Ausdruck für das Herz?",
-                answers: [
-                    { text: "Cor", correct: true },
-                    { text: "Splen", correct: false },
-                    { text: "Hepar", correct: false },
-                    { text: "Ren", correct: false }
-                ],
-                explanation: "Der lateinische Ausdruck für das Herz lautet Cor."
-            },
-            {
-                question: "Beschreiben Sie die genaue Lage des Herzens!",
-                answers: [
-                    { text: "Größtenteils links im Brustkorb, hinter dem Brustbein", correct: true },
-                    { text: "Zentriert im Bauchraum, unter dem Zwerchfell", correct: false },
-                    { text: "Rechts im Brustkorb, neben der Leber", correct: false },
-                    { text: "Hinter der Wirbelsäule auf Höhe der Nieren", correct: false }
-                ],
-                explanation: "Der größere Anteil des Herzens liegt auf der linken Seite des Brustkorbs (Thorax). Es befindet sich hinter dem Brustbein (Sternum) im mittleren Mediastinum."
-            },
-            {
-                question: "Welche Muskulatur findet man im Herzen?",
-                answers: [
-                    { text: "Eine quergestreifte, aber unwillkürliche Muskulatur", correct: true },
-                    { text: "Glatte, unwillkürliche Muskulatur", correct: false },
-                    { text: "Quergestreifte, willkürliche Skelettmuskulatur", correct: false },
-                    { text: "Eine Mischung aus glatter und Skelettmuskulatur", correct: false }
-                ],
-                explanation: "Die Herzmuskulatur ist wie die Skelettmuskulatur quergestreift. Allerdings besitzt sie Eigenschaften der glatten Muskulatur: Sie ist autonom, somit nicht willkürlich steuerbar."
-            },
-            {
-                question: "Wo entspringen die Gefäße zur Versorgung der Herzmuskulatur (Herzkranzgefäße)?",
-                answers: [
-                    { text: "Aus der Aorta", correct: true },
-                    { text: "Aus der Lungenarterie", correct: false },
-                    { text: "Aus der oberen Hohlvene", correct: false },
-                    { text: "Direkt aus der linken Herzkammer", correct: false }
-                ],
-                explanation: "Das Herz wird durch zwei Herzkranzgefäße mit Blut versorgt. Diese entspringen der Aorta, direkt nach deren Austritt aus der linken Herzkammer."
-            },
-            {
-                question: "Welche Blutgefäße treten in den linken Vorhof ein?",
-                answers: [
-                    { text: "Die Lungenvenen mit sauerstoffreichem Blut", correct: true },
-                    { text: "Die Hohlvenen mit sauerstoffarmem Blut", correct: false },
-                    { text: "Die Aorta mit sauerstoffreichem Blut", correct: false },
-                    { text: "Die Lungenarterie mit sauerstoffarmem Blut", correct: false }
-                ],
-                explanation: "In den linken Vorhof münden die Lungenvenen (vena pulmonalis) gemeinsam mit dem sauerstoffreichen Blut der Lunge."
-            },
-            {
-                question: "Welche Blutgefäße treten aus den beiden Herzkammern aus?",
-                answers: [
-                    { text: "Lungenarterie (rechts) und Aorta (links)", correct: true },
-                    { text: "Lungenvenen (rechts) und Hohlvenen (links)", correct: false },
-                    { text: "Aorta (rechts) und Lungenarterie (links)", correct: false },
-                    { text: "Hohlvenen (rechts) und Lungenvenen (links)", correct: false }
-                ],
-                explanation: "Aus der rechten Herzkammer tritt die Lungenarterie aus. Aus der linken Herzkammer tritt die Aorta aus."
-            },
-            {
-                question: "Welche Aufgaben erfüllen die Herzklappen?",
-                answers: [
-                    { text: "Sie bestimmen die Richtung des Blutflusses und verhindern den Rückfluss", correct: true },
-                    { text: "Sie erzeugen die elektrischen Impulse für den Herzschlag", correct: false },
-                    { text: "Sie versorgen den Herzmuskel mit Sauerstoff", correct: false },
-                    { text: "Sie filtern das Blut von Abfallstoffen", correct: false }
-                ],
-                explanation: "Die vier Herzklappen bestimmen die Richtung des Blutflusses und verhindern den Blutrückfluss. Sie wirken wie Ventile."
-            },
-            {
-                question: "Was beschreibt die Systole?",
-                answers: [
-                    { text: "Die Anspannungs- und Auswurfsphase des Herzens", correct: true },
-                    { text: "Die Entspannungs- und Füllungsphase des Herzens", correct: false },
-                    { text: "Die Phase der elektrischen Erregung", correct: false },
-                    { text: "Die Ruhephase des Herzens zwischen zwei Schlägen", correct: false }
-                ],
-                explanation: "Die Systole ist die Anspannungs- und Auswurfsphase. Der Herzmuskel kontrahiert und das Blut wird in den großen und kleinen Kreislauf gepumpt."
-            },
-            {
-                question: "Wie hoch sollten die Norm-Werte beim Blutdruck bei einem durchschnittlichen Erwachsenen sein?",
-                answers: [
-                    { text: "Ca. 120/80 mmHg", correct: true },
-                    { text: "Ca. 160/100 mmHg", correct: false },
-                    { text: "Ca. 90/60 mmHg", correct: false },
-                    { text: "Ca. 80/120 mmHg", correct: false }
-                ],
-                explanation: "Der systolische Wert (oberer Wert) soll circa bei 120 mmHg liegen, der diastolische Wert (unterer Wert) circa bei 80 mmHg."
-            },
-            {
-                question: "Wo beginnt und wo endet das Lymphsystem?",
-                answers: [
-                    { text: "Es beginnt im Zwischenzellraum und endet im Venenwinkel", correct: true },
-                    { text: "Es beginnt im Herzen und endet in den Kapillaren", correct: false },
-                    { text: "Es beginnt in der Milz und endet in der Leber", correct: false },
-                    { text: "Es ist ein offener Kreislauf ohne definierten Anfang und Ende", correct: false }
-                ],
-                explanation: "Das Lymphsystem beginnt 'blind' im Interzellularraum (Zwischenzellraum), sammelt dort die Lymphe und führt sie über den Venenwinkel wieder in den Blutkreislauf zurück."
-            },
-             {
-                question: "Was ist ein Lymphangion?",
-                answers: [
-                    { text: "Der Abstand zwischen zwei Lymphklappen", correct: true },
-                    { text: "Ein besonders großer Lymphknoten", correct: false },
-                    { text: "Die Mündungsstelle der Lymphe ins Blut", correct: false },
-                    { text: "Eine Zelle des lymphatischen Systems", correct: false }
-                ],
-                explanation: "Als Lymphangion bezeichnet man den Abstand zwischen den zwei Lymphklappen in den Kollektoren. Die Angione kontrahieren und pressen so die Lymphe weiter."
-            },
-            {
-                question: "Welche Stoffe werden typischerweise NICHT durch das Lymphsystem abtransportiert?",
-                answers: [
-                    { text: "Rote Blutkörperchen (Erythrozyten)", correct: true },
-                    { text: "Abgestorbene Zellen und Fremdkörper", correct: false },
-                    { text: "Lipide (Fette) aus dem Darm", correct: false },
-                    { text: "Große Eiweißmoleküle aus dem Gewebe", correct: false }
-                ],
-                explanation: "Die Lymphe besteht aus Wasser, Abbauprodukten, Staub, abgestorbenen Zellen, Lipiden und Krankheitserregern. Gesunde rote Blutkörperchen verbleiben im Blutkreislauf."
-            },
-            {
-                question: "Welches Organ gehört zu den primär lymphatischen Organen?",
-                answers: [
-                    { text: "Thymus und Knochenmark", correct: true },
-                    { text: "Milz und Mandeln", correct: false },
-                    { text: "Leber und Nieren", correct: false },
-                    { text: "Nur die Lymphknoten", correct: false }
-                ],
-                explanation: "Das Knochenmark und den Thymus bezeichnet man als primär lymphatische Organe. Hier werden die Lymphozyten gebildet und reifen heran."
-            },
-            {
-                question: "Was ist die Hauptfunktion der Milz?",
-                answers: [
-                    { text: "Filterung des Blutes und Abbau alter Erythrozyten", correct: true },
-                    { text: "Produktion von Verdauungsenzymen", correct: false },
-                    { text: "Bildung von roten Blutkörperchen beim Erwachsenen", correct: false },
-                    { text: "Speicherung von Galle", correct: false }
-                ],
-                explanation: "Die Milz dient der Immunabwehr (weiße Pulpa) und filtert das Blut, indem sie alte bzw. geschädigte Erythrozyten und Thrombozyten abbaut (rote Pulpa)."
-            },
-            {
-                question: "Welche Lymphknoten sind die erste Filterstation für Lymphe aus den Armen?",
-                answers: [
-                    { text: "Achsellymphknoten", correct: true },
-                    { text: "Leistenlymphknoten", correct: false },
-                    { text: "Halslymphknoten", correct: false },
-                    { text: "Paraaortale Lymphknoten", correct: false }
-                ],
-                explanation: "Regionäre Lymphknoten sind die erste Filterstation für bestimmte Regionen. Die Achsellymphknoten filtern die Lymphe aus den Armen."
-            },
-            {
-                question: "Welcher Zustand ist eine Kontraindikation für die manuelle Lymphdrainage?",
-                answers: [
-                    { text: "Akute Entzündungen und Infektionen", correct: true },
-                    { text: "Leichte Muskelverspannungen", correct: false },
-                    { text: "Stress und allgemeine Müdigkeit", correct: false },
-                    { text: "Trockene Haut", correct: false }
-                ],
-                explanation: "Kontraindikationen sind u.a. unklare Ödeme, Krebserkrankungen, akute Entzündungen und Infektionen, Fieber, Thrombose und Herzschwäche, da die Lymphdrainage die Verteilung von Erregern fördern könnte."
-            },
-            {
-                question: "Welches Organ findet man beim Mann beim Übergang von der Harnblase zur Harnröhre?",
-                answers: [
-                    { text: "Prostata", correct: true },
-                    { text: "Hoden", correct: false },
-                    { text: "Nebenhoden", correct: false },
-                    { text: "Samenblase", correct: false }
-                ],
-                explanation: "In der Prostata laufen Samenleiter und Harnröhre zusammen. Sie liegt am Übergang der Harnblase zur Harnröhre."
-            },
-            {
-                question: "Wie heißt das Hormon der Hoden?",
-                answers: [
-                    { text: "Testosteron", correct: true },
-                    { text: "Östrogen", correct: false },
-                    { text: "Progesteron", correct: false },
-                    { text: "Adrenalin", correct: false }
-                ],
-                explanation: "Die Hoden bilden das männliche Geschlechtshormon Testosteron, welches für das männliche Erscheinungsbild und die Reifung der Samen verantwortlich ist."
-            },
-            {
-                question: "Wie heißen die Hormone der Eierstöcke?",
-                answers: [
-                    { text: "Östrogen und Progesteron", correct: true },
-                    { text: "Testosteron und Androgen", correct: false },
-                    { text: "Insulin und Glukagon", correct: false },
-                    { text: "Adrenalin und Noradrenalin", correct: false }
-                ],
-                explanation: "Die Eierstöcke produzieren die weiblichen Sexualhormone Progesteron und Östrogen."
-            },
-            {
-                question: "Was sind Hormone?",
-                answers: [
-                    { text: "Botenstoffe, die über den Blutkreislauf wirken", correct: true },
-                    { text: "Nervenzellen, die elektrische Signale leiten", correct: false },
-                    { text: "Enzyme, die chemische Reaktionen beschleunigen", correct: false },
-                    { text: "Bestandteile der Zellmembran", correct: false }
-                ],
-                explanation: "Hormone werden durch endokrine Drüsen gebildet und direkt in den Blutkreislauf abgegeben. Sie sind Boten- bzw. Regulationsstoffe, die den Stoffwechsel von Organen beeinflussen."
-            },
-            {
-                question: "Wo liegen die Nebennieren?",
-                answers: [
-                    { text: "Kappenartig auf den Nieren", correct: true },
-                    { text: "Neben der Schilddrüse", correct: false },
-                    { text: "Im Gehirn, nahe der Hypophyse", correct: false },
-                    { text: "In der Bauchspeicheldrüse", correct: false }
-                ],
-                explanation: "Die beiden Nebennieren sitzen kappenartig auf den Nieren und befinden sich somit im hinteren Bauchraum."
-            },
-            {
-                question: "Welche Hormone findet man im NebennierenMARK?",
-                answers: [
-                    { text: "Adrenalin und Noradrenalin", correct: true },
-                    { text: "Aldosteron und Cortisol", correct: false },
-                    { text: "Östrogen und Androgen", correct: false },
-                    { text: "Insulin und Glukagon", correct: false }
-                ],
-                explanation: "Im Nebennierenmark werden Dopamin, Adrenalin und Noradrenalin gebildet. Sie werden auch als Stresshormone bezeichnet."
-            },
-            {
-                question: "Beschreiben Sie die Zirbeldrüse (Epiphyse) und deren Funktion!",
-                answers: [
-                    { text: "Steuert den Schlaf-Wachrhythmus durch Melatonin", correct: true },
-                    { text: "Reguliert den Blutzuckerspiegel", correct: false },
-                    { text: "Kontrolliert das Körperwachstum", correct: false },
-                    { text: "Produziert Schilddrüsenhormone", correct: false }
-                ],
-                explanation: "Die Epiphyse (Zirbeldrüse) ist eine kleine Hormondrüse im Zwischenhirn. Sie steuert über die Hormone Melatonin und Serotonin den Schlaf-Wachrhythmus."
-            },
-            {
-                question: "Wo liegt die Schilddrüse und wie sieht sie aus?",
-                answers: [
-                    { text: "Vor dem Kehlkopf, schmetterlingsförmig", correct: true },
-                    { text: "Hinter dem Magen, bohnenförmig", correct: false },
-                    { text: "Auf den Nieren, pyramidenförmig", correct: false },
-                    { text: "Im Becken, birnenförmig", correct: false }
-                ],
-                explanation: "Die Schilddrüse ähnelt mit ihren beiden Lappen, die durch eine schmale Brücke (Isthmus) verbunden sind, einem Schmetterling. Sie liegt wie ein Schild vor dem Kehlkopf."
-            },
-            {
-                question: "Wie heißen die drei wichtigsten Hormone der Schilddrüse?",
-                answers: [
-                    { text: "Thyroxin (T4), Trijodthyronin (T3) und Calzitonin", correct: true },
-                    { text: "Adrenalin, Noradrenalin und Dopamin", correct: false },
-                    { text: "Östrogen, Progesteron und Testosteron", correct: false },
-                    { text: "Insulin, Glukagon und Somatostatin", correct: false }
-                ],
-                explanation: "Die Schilddrüse bildet die Hormone Thyroxin (T4), Trijodthyronin (T3) und Calzitonin. T3 und T4 steuern den Stoffwechsel, Calzitonin den Calciumhaushalt."
-            },
-            // Duplicate Question 31 with different wording for a full 46 questions
-             {
-                question: "Welche Funktion haben Lymphangione?",
-                answers: [
-                    { text: "Sie pumpen die Lymphe durch Kontraktion weiter", correct: true },
-                    { text: "Sie filtern Krankheitserreger aus der Lymphe", correct: false },
-                    { text: "Sie produzieren Lymphozyten", correct: false },
-                    { text: "Sie verbinden das Lymphsystem mit dem Blutkreislauf", correct: false }
-                ],
-                explanation: "Die Angione (Abschnitte zwischen den Klappen) kontrahieren wie das Herz in regelmäßigen Abständen und pressen so die Lymphe weiter."
-            },
-            // Duplicate Question 21 with different wording
-            {
-                question: "Aus welchen vier Haupthohlräumen besteht das Herz?",
-                answers: [
-                    { text: "Zwei Vorhöfe (Atrien) und zwei Kammern (Ventrikel)", correct: true },
-                    { text: "Aorta, Lungenarterie, obere und untere Hohlvene", correct: false },
-                    { text: "Endokard, Myokard, Epikard und Perikard", correct: false },
-                    { text: "Linke und rechte Lunge, linker und rechter Vorhof", correct: false }
-                ],
-                explanation: "Das Herz besteht aus zwei Kammern/Ventrikeln (unten) und zwei Vorhöfen/Atrien (oben), die jeweils durch eine Herzscheidewand (Septum) voneinander getrennt sind."
-            },
-            // Duplicate Question 14 with different wording
-            {
-                question: "Welche Aussage über den Wandaufbau von Arterien und Venen ist korrekt?",
-                answers: [
-                    { text: "Arterien haben eine dickere Muskelschicht als Venen", correct: true },
-                    { text: "Venen haben eine dickere Muskelschicht als Arterien", correct: false },
-                    { text: "Nur Arterien bestehen aus drei Wandschichten", correct: false },
-                    { text: "Nur Venen besitzen eine innere Endothelschicht", correct: false }
-                ],
-                explanation: "Beide Gefäßtypen besitzen drei Wandschichten. Arterien haben jedoch eine besonders dicke Muskelfaserschicht (Tunica media), um dem hohen Druck standzuhalten, während sie bei Venen deutlich dünner ist."
-            }
+            { question: "Wie viel Blut besitzt ein erwachsener Mensch circa?", answers: [ { text: "Ca. 5-7 Liter", correct: true }, { text: "Ca. 2-3 Liter", correct: false }, { text: "Ca. 8-10 Liter", correct: false }, { text: "Ca. 1-2 Liter", correct: false } ], explanation: "Je nach Größe und Gewicht besitzt ein erwachsener Mensch circa 5-7 Liter Blut." },
+            { question: "Was versteht man unter Blutplasma?", answers: [ { text: "Der flüssige Bestandteil des Blutes", correct: true }, { text: "Die roten Blutkörperchen", correct: false }, { text: "Die weißen Blutkörperchen", correct: false }, { text: "Ein Gerinnungsfaktor", correct: false } ], explanation: "Blut besteht zu 55% aus Blutplasma. Das Blutplasma ist der flüssige Bestandteil des Blutes und besteht zu 90% aus Wasser und zu 10% aus gelösten Stoffen." },
+            { question: "Nennen Sie die drei Zellreihen des Blutes (Deutsch und Latein)!", answers: [ { text: "Erythrozyten (rote), Leukozyten (weiße), Thrombozyten (Plättchen)", correct: true }, { text: "Plasma, Serum, Fibrinogen", correct: false }, { text: "Arterien, Venen, Kapillaren", correct: false }, { text: "Lymphozyten, Monozyten, Granulozyten", correct: false } ], explanation: "Man unterscheidet zwischen den roten Blutkörperchen (Erythrozyten), den weißen Blutkörperchen (Leukozyten) und den Blutplättchen (Thrombozyten)." },
+            { question: "Wo werden die Zellen des Blutes gebildet?", answers: [ { text: "Im roten Knochenmark", correct: true }, { text: "In der Leber", correct: false }, { text: "In der Milz", correct: false }, { text: "Im Herzen", correct: false } ], explanation: "Alle Blutzellen entstehen im roten Knochenmark aus einer gemeinsamen Stammzelle. Diesen Prozess nennt man Hämatopoese." },
+            { question: "Welche Aufgabe erfüllen die Erythrozyten im menschlichen Körper?", answers: [ { text: "Sauerstofftransport", correct: true }, { text: "Immunabwehr", correct: false }, { text: "Blutgerinnung", correct: false }, { text: "Hormonproduktion", correct: false } ], explanation: "Die roten Blutkörperchen (Erythrozyten) enthalten das Hämoglobin, welches den Sauerstoff aus der Lunge in das Gewebe und den Kohlendioxid aus dem Gewebe in die Lunge transportiert." },
+            { question: "Welche Aufgabe erfüllen die Leukozyten im menschlichen Körper?", answers: [ { text: "Immunabwehr", correct: true }, { text: "Sauerstofftransport", correct: false }, { text: "Nährstoffspeicherung", correct: false }, { text: "Wärmeregulation", correct: false } ], explanation: "Die Aufgabe der Leukozyten ist die unspezifische sowie die spezifische Immunabwehr." },
+            { question: "Welche Aufgabe erfüllen die Thrombozyten im menschlichen Körper?", answers: [ { text: "Blutgerinnung und Blutstillung", correct: true }, { text: "Transport von Abfallstoffen", correct: false }, { text: "Bekämpfung von Viren", correct: false }, { text: "Bildung von Antikörpern", correct: false } ], explanation: "Thrombozyten spielen bei der Blutgerinnung eine wichtige Rolle, indem sie mit Hilfe der Gerinnungsfaktoren für die Blutstillung sorgen." },
+            { question: "Welche Hauteffloreszenz sehen Sie an der Hautoberfläche nach abgeschlossener Blutstillung und Blutgerinnung?", answers: [ { text: "Kruste (Crusta)", correct: true }, { text: "Pustel (Pustula)", correct: false }, { text: "Quaddel (Urtica)", correct: false }, { text: "Narbe (Cicatrix)", correct: false } ], explanation: "Nach abgeschlossener Blutstillung und Blutgerinnung sieht man die Sekundäreffloreszenz Kruste (Crusta)." },
+            { question: "Definition des Begriffes Thrombose?", answers: [ { text: "Die Bildung eines Blutgerinnsels in einem Blutgefäß", correct: true }, { text: "Eine Erweiterung der Venen", correct: false }, { text: "Eine Entzündung der Arterienwand", correct: false }, { text: "Ein Mangel an roten Blutkörperchen", correct: false } ], explanation: "Als Thrombose bezeichnet man die Bildung eines Blutgerinnsels (Thrombus) innerhalb eines Blutgefäßes." },
+            { question: "Welcher der folgenden Faktoren ist KEIN Risikofaktor für eine Thromboseentstehung?", answers: [ { text: "Regelmäßige Bewegung", correct: true }, { text: "Rauchen", correct: false }, { text: "Schwangerschaft", correct: false }, { text: "Übergewicht", correct: false } ], explanation: "Risikofaktoren sind u.a. Blutgerinnungsstörungen, Schwangerschaft, Rauchen, Übergewicht, lange Reisen und Bettruhe. Regelmäßige Bewegung fördert den Blutfluss und senkt das Risiko." },
+            { question: "Was ist der Hauptzweck des großen Kreislaufs (Körperkreislauf)?", answers: [ { text: "Versorgung der Körperzellen mit Sauerstoff", correct: true }, { text: "Anreicherung des Blutes mit Sauerstoff in der Lunge", correct: false }, { text: "Filterung des Blutes in den Nieren", correct: false }, { text: "Transport von Lymphe", correct: false } ], explanation: "Der Körperkreislauf nimmt seinen Ursprung in der linken Herzkammer und pumpt sauerstoffreiches Blut in den Körper, um die Zellen mit Sauerstoff und Nährstoffen zu versorgen." },
+            { question: "Wo beginnt der Lungenkreislauf (kleiner Kreislauf)?", answers: [ { text: "In der rechten Herzkammer", correct: true }, { text: "In der linken Herzkammer", correct: false }, { text: "Im rechten Vorhof", correct: false }, { text: "In den Lungenvenen", correct: false } ], explanation: "Der Lungenkreislauf nimmt seinen Ursprung in der rechten Herzkammer. Durch die Herzkontraktion wird das sauerstoffarme Blut über die Lungenarterie in die Lungenkapillaren gepumpt." },
+            { question: "Wo sammelt sich das venöse Blut aus Kopf, Nacken und Armen?", answers: [ { text: "In der oberen Hohlvene (Vena cava superior)", correct: true }, { text: "In der unteren Hohlvene (Vena cava inferior)", correct: false }, { text: "In der Aorta", correct: false }, { text: "In der Pfortader", correct: false } ], explanation: "Die obere Hohlvene (vena cava superior) transportiert das sauerstoffarme Blut aus Kopf, Nacken und Armen zum Herzen." },
+            { question: "Was ist ein wesentliches Merkmal von Venen, das Arterien nicht haben?", answers: [ { text: "Venenklappen", correct: true }, { text: "Eine dicke Muskelschicht", correct: false }, { text: "Ein spürbarer Pulsschlag", correct: false }, { text: "Sauerstoffreiches Blut im Körperkreislauf", correct: false } ], explanation: "Venen besitzen Venenklappen, die dafür sorgen, dass das Blut nur Richtung Herz fließt und nicht durch die Schwerkraft zurücksackt." },
+            { question: "Wie gelangen Stoffe vom Blut ins Gewebe?", answers: [ { text: "Durch Stoffaustausch in den Kapillaren", correct: true }, { text: "Durch direkte Diffusion durch die Arterienwand", correct: false }, { text: "Ausschließlich über das Lymphsystem", correct: false }, { text: "Durch aktive Pumpen in den Venen", correct: false } ], explanation: "In den Kapillaren findet der Stoffaustausch zwischen Blut und Gewebe statt. Aufgrund des Drucks werden Wasser und niedermolekulare Stoffe in das Gewebe gepresst." },
+            { question: "Welcher Faktor trägt NICHT zum venösen Blutrückfluss zum Herzen bei?", answers: [ { text: "Der hohe Druck in den Kapillaren", correct: true }, { text: "Die Muskelpumpen (z.B. Wadenmuskelpumpe)", correct: false }, { text: "Die Atmung (Unterdruck im Brustraum)", correct: false }, { text: "Die Venenklappen", correct: false } ], explanation: "Der venöse Blutrückfluss wird durch die Pulswelle der Arterien, die Venenklappen, die Muskelpumpen und die Atmung unterstützt. Der Druck in den Kapillaren ist für den Stoffaustausch, nicht den Rückfluss in den großen Venen, relevant." },
+            { question: "Was versteht man unter dem Begriff Varizen?", answers: [ { text: "Erweiterte Venen (Krampfadern)", correct: true }, { text: "Verengte Arterien", correct: false }, { text: "Entzündete Lymphknoten", correct: false }, { text: "Ein Blutgerinnsel", correct: false } ], explanation: "Varizen sind Krampfadern bzw. erweiterte, oft geschlängelte Venen, bei denen die Venenklappen ihre Funktion verloren haben." },
+            { question: "Wo treten Varizen am häufigsten auf?", answers: [ { text: "An den Beinen", correct: true }, { text: "An den Armen", correct: false }, { text: "In der Speiseröhre", correct: false }, { text: "Im Gesicht", correct: false } ], explanation: "Die Prädilektionsstelle (bevorzugter Ort) für Varizen sind die Beine (Ober-/Unterschenkel)." },
+            { question: "Wie heißt der lateinische Ausdruck für das Herz?", answers: [ { text: "Cor", correct: true }, { text: "Splen", correct: false }, { text: "Hepar", correct: false }, { text: "Ren", correct: false } ], explanation: "Der lateinische Ausdruck für das Herz lautet Cor." },
+            { question: "Beschreiben Sie die genaue Lage des Herzens!", answers: [ { text: "Größtenteils links im Brustkorb, hinter dem Brustbein", correct: true }, { text: "Zentriert im Bauchraum, unter dem Zwerchfell", correct: false }, { text: "Rechts im Brustkorb, neben der Leber", correct: false }, { text: "Hinter der Wirbelsäule auf Höhe der Nieren", correct: false } ], explanation: "Der größere Anteil des Herzens liegt auf der linken Seite des Brustkorbs (Thorax). Es befindet sich hinter dem Brustbein (Sternum) im mittleren Mediastinum." },
+            { question: "Welche Muskulatur findet man im Herzen?", answers: [ { text: "Eine quergestreifte, aber unwillkürliche Muskulatur", correct: true }, { text: "Glatte, unwillkürliche Muskulatur", correct: false }, { text: "Quergestreifte, willkürliche Skelettmuskulatur", correct: false }, { text: "Eine Mischung aus glatter und Skelettmuskulatur", correct: false } ], explanation: "Die Herzmuskulatur ist wie die Skelettmuskulatur quergestreift. Allerdings besitzt sie Eigenschaften der glatten Muskulatur: Sie ist autonom, somit nicht willkürlich steuerbar." },
+            { question: "Wo entspringen die Gefäße zur Versorgung der Herzmuskulatur (Herzkranzgefäße)?", answers: [ { text: "Aus der Aorta", correct: true }, { text: "Aus der Lungenarterie", correct: false }, { text: "Aus der oberen Hohlvene", correct: false }, { text: "Direkt aus der linken Herzkammer", correct: false } ], explanation: "Das Herz wird durch zwei Herzkranzgefäße mit Blut versorgt. Diese entspringen der Aorta, direkt nach deren Austritt aus der linken Herzkammer." },
+            { question: "Welche Blutgefäße treten in den linken Vorhof ein?", answers: [ { text: "Die Lungenvenen mit sauerstoffreichem Blut", correct: true }, { text: "Die Hohlvenen mit sauerstoffarmem Blut", correct: false }, { text: "Die Aorta mit sauerstoffreichem Blut", correct: false }, { text: "Die Lungenarterie mit sauerstoffarmem Blut", correct: false } ], explanation: "In den linken Vorhof münden die Lungenvenen (vena pulmonalis) gemeinsam mit dem sauerstoffreichen Blut der Lunge." },
+            { question: "Welche Blutgefäße treten aus den beiden Herzkammern aus?", answers: [ { text: "Lungenarterie (rechts) und Aorta (links)", correct: true }, { text: "Lungenvenen (rechts) und Hohlvenen (links)", correct: false }, { text: "Aorta (rechts) und Lungenarterie (links)", correct: false }, { text: "Hohlvenen (rechts) und Lungenvenen (links)", correct: false } ], explanation: "Aus der rechten Herzkammer tritt die Lungenarterie aus. Aus der linken Herzkammer tritt die Aorta aus." },
+            { question: "Welche Aufgaben erfüllen die Herzklappen?", answers: [ { text: "Sie bestimmen die Richtung des Blutflusses und verhindern den Rückfluss", correct: true }, { text: "Sie erzeugen die elektrischen Impulse für den Herzschlag", correct: false }, { text: "Sie versorgen den Herzmuskel mit Sauerstoff", correct: false }, { text: "Sie filtern das Blut von Abfallstoffen", correct: false } ], explanation: "Die vier Herzklappen bestimmen die Richtung des Blutflusses und verhindern den Blutrückfluss. Sie wirken wie Ventile." },
+            { question: "Was beschreibt die Systole?", answers: [ { text: "Die Anspannungs- und Auswurfsphase des Herzens", correct: true }, { text: "Die Entspannungs- und Füllungsphase des Herzens", correct: false }, { text: "Die Phase der elektrischen Erregung", correct: false }, { text: "Die Ruhephase des Herzens zwischen zwei Schlägen", correct: false } ], explanation: "Die Systole ist die Anspannungs- und Auswurfsphase. Der Herzmuskel kontrahiert und das Blut wird in den großen und kleinen Kreislauf gepumpt." },
+            { question: "Wie hoch sollten die Norm-Werte beim Blutdruck bei einem durchschnittlichen Erwachsenen sein?", answers: [ { text: "Ca. 120/80 mmHg", correct: true }, { text: "Ca. 160/100 mmHg", correct: false }, { text: "Ca. 90/60 mmHg", correct: false }, { text: "Ca. 80/120 mmHg", correct: false } ], explanation: "Der systolische Wert (oberer Wert) soll circa bei 120 mmHg liegen, der diastolische Wert (unterer Wert) circa bei 80 mmHg." },
+            { question: "Wo beginnt und wo endet das Lymphsystem?", answers: [ { text: "Es beginnt im Zwischenzellraum und endet im Venenwinkel", correct: true }, { text: "Es beginnt im Herzen und endet in den Kapillaren", correct: false }, { text: "Es beginnt in der Milz und endet in der Leber", correct: false }, { text: "Es ist ein offener Kreislauf ohne definierten Anfang und Ende", correct: false } ], explanation: "Das Lymphsystem beginnt 'blind' im Interzellularraum (Zwischenzellraum), sammelt dort die Lymphe und führt sie über den Venenwinkel wieder in den Blutkreislauf zurück." },
+            { question: "Was ist ein Lymphangion?", answers: [ { text: "Der Abstand zwischen zwei Lymphklappen", correct: true }, { text: "Ein besonders großer Lymphknoten", correct: false }, { text: "Die Mündungsstelle der Lymphe ins Blut", correct: false }, { text: "Eine Zelle des lymphatischen Systems", correct: false } ], explanation: "Als Lymphangion bezeichnet man den Abstand zwischen den zwei Lymphklappen in den Kollektoren. Die Angione kontrahieren und pressen so die Lymphe weiter." },
+            { question: "Welche Stoffe werden typischerweise NICHT durch das Lymphsystem abtransportiert?", answers: [ { text: "Rote Blutkörperchen (Erythrozyten)", correct: true }, { text: "Abgestorbene Zellen und Fremdkörper", correct: false }, { text: "Lipide (Fette) aus dem Darm", correct: false }, { text: "Große Eiweißmoleküle aus dem Gewebe", correct: false } ], explanation: "Die Lymphe besteht aus Wasser, Abbauprodukten, Staub, abgestorbenen Zellen, Lipiden und Krankheitserregern. Gesunde rote Blutkörperchen verbleiben im Blutkreislauf." },
+            { question: "Welches Organ gehört zu den primär lymphatischen Organen?", answers: [ { text: "Thymus und Knochenmark", correct: true }, { text: "Milz und Mandeln", correct: false }, { text: "Leber und Nieren", correct: false }, { text: "Nur die Lymphknoten", correct: false } ], explanation: "Das Knochenmark und den Thymus bezeichnet man als primär lymphatische Organe. Hier werden die Lymphozyten gebildet und reifen heran." },
+            { question: "Was ist die Hauptfunktion der Milz?", answers: [ { text: "Filterung des Blutes und Abbau alter Erythrozyten", correct: true }, { text: "Produktion von Verdauungsenzymen", correct: false }, { text: "Bildung von roten Blutkörperchen beim Erwachsenen", correct: false }, { text: "Speicherung von Galle", correct: false } ], explanation: "Die Milz dient der Immunabwehr (weiße Pulpa) und filtert das Blut, indem sie alte bzw. geschädigte Erythrozyten und Thrombozyten abbaut (rote Pulpa)." },
+            { question: "Welche Lymphknoten sind die erste Filterstation für Lymphe aus den Armen?", answers: [ { text: "Achsellymphknoten", correct: true }, { text: "Leistenlymphknoten", correct: false }, { text: "Halslymphknoten", correct: false }, { text: "Paraaortale Lymphknoten", correct: false } ], explanation: "Regionäre Lymphknoten sind die erste Filterstation für bestimmte Regionen. Die Achsellymphknoten filtern die Lymphe aus den Armen." },
+            { question: "Welcher Zustand ist eine Kontraindikation für die manuelle Lymphdrainage?", answers: [ { text: "Akute Entzündungen und Infektionen", correct: true }, { text: "Leichte Muskelverspannungen", correct: false }, { text: "Stress und allgemeine Müdigkeit", correct: false }, { text: "Trockene Haut", correct: false } ], explanation: "Kontraindikationen sind u.a. unklare Ödeme, Krebserkrankungen, akute Entzündungen und Infektionen, Fieber, Thrombose und Herzschwäche, da die Lymphdrainage die Verteilung von Erregern fördern könnte." },
+            { question: "Welches Organ findet man beim Mann beim Übergang von der Harnblase zur Harnröhre?", answers: [ { text: "Prostata", correct: true }, { text: "Hoden", correct: false }, { text: "Nebenhoden", correct: false }, { text: "Samenblase", correct: false } ], explanation: "In der Prostata laufen Samenleiter und Harnröhre zusammen. Sie liegt am Übergang der Harnblase zur Harnröhre." },
+            { question: "Wie heißt das Hormon der Hoden?", answers: [ { text: "Testosteron", correct: true }, { text: "Östrogen", correct: false }, { text: "Progesteron", correct: false }, { text: "Adrenalin", correct: false } ], explanation: "Die Hoden bilden das männliche Geschlechtshormon Testosteron, welches für das männliche Erscheinungsbild und die Reifung der Samen verantwortlich ist." },
+            { question: "Wie heißen die Hormone der Eierstöcke?", answers: [ { text: "Östrogen und Progesteron", correct: true }, { text: "Testosteron und Androgen", correct: false }, { text: "Insulin und Glukagon", correct: false }, { text: "Adrenalin und Noradrenalin", correct: false } ], explanation: "Die Eierstöcke produzieren die weiblichen Sexualhormone Progesteron und Östrogen." },
+            { question: "Was sind Hormone?", answers: [ { text: "Botenstoffe, die über den Blutkreislauf wirken", correct: true }, { text: "Nervenzellen, die elektrische Signale leiten", correct: false }, { text: "Enzyme, die chemische Reaktionen beschleunigen", correct: false }, { text: "Bestandteile der Zellmembran", correct: false } ], explanation: "Hormone werden durch endokrine Drüsen gebildet und direkt in den Blutkreislauf abgegeben. Sie sind Boten- bzw. Regulationsstoffe, die den Stoffwechsel von Organen beeinflussen." },
+            { question: "Wo liegen die Nebennieren?", answers: [ { text: "Kappenartig auf den Nieren", correct: true }, { text: "Neben der Schilddrüse", correct: false }, { text: "Im Gehirn, nahe der Hypophyse", correct: false }, { text: "In der Bauchspeicheldrüse", correct: false } ], explanation: "Die beiden Nebennieren sitzen kappenartig auf den Nieren und befinden sich somit im hinteren Bauchraum." },
+            { question: "Welche Hormone findet man im NebennierenMARK?", answers: [ { text: "Adrenalin und Noradrenalin", correct: true }, { text: "Aldosteron und Cortisol", correct: false }, { text: "Östrogen und Androgen", correct: false }, { text: "Insulin und Glukagon", correct: false } ], explanation: "Im Nebennierenmark werden Dopamin, Adrenalin und Noradrenalin gebildet. Sie werden auch als Stresshormone bezeichnet." },
+            { question: "Beschreiben Sie die Zirbeldrüse (Epiphyse) und deren Funktion!", answers: [ { text: "Steuert den Schlaf-Wachrhythmus durch Melatonin", correct: true }, { text: "Reguliert den Blutzuckerspiegel", correct: false }, { text: "Kontrolliert das Körperwachstum", correct: false }, { text: "Produziert Schilddrüsenhormone", correct: false } ], explanation: "Die Epiphyse (Zirbeldrüse) ist eine kleine Hormondrüse im Zwischenhirn. Sie steuert über die Hormone Melatonin und Serotonin den Schlaf-Wachrhythmus." },
+            { question: "Wo liegt die Schilddrüse und wie sieht sie aus?", answers: [ { text: "Vor dem Kehlkopf, schmetterlingsförmig", correct: true }, { text: "Hinter dem Magen, bohnenförmig", correct: false }, { text: "Auf den Nieren, pyramidenförmig", correct: false }, { text: "Im Becken, birnenförmig", correct: false } ], explanation: "Die Schilddrüse ähnelt mit ihren beiden Lappen, die durch eine schmale Brücke (Isthmus) verbunden sind, einem Schmetterling. Sie liegt wie ein Schild vor dem Kehlkopf." },
+            { question: "Wie heißen die drei wichtigsten Hormone der Schilddrüse?", answers: [ { text: "Thyroxin (T4), Trijodthyronin (T3) und Calzitonin", correct: true }, { text: "Adrenalin, Noradrenalin und Dopamin", correct: false }, { text: "Östrogen, Progesteron und Testosteron", correct: false }, { text: "Insulin, Glukagon und Somatostatin", correct: false } ], explanation: "Die Schilddrüse bildet die Hormone Thyroxin (T4), Trijodthyronin (T3) und Calzitonin. T3 und T4 steuern den Stoffwechsel, Calzitonin den Calciumhaushalt." },
+            { question: "Welche Funktion haben Lymphangione?", answers: [ { text: "Sie pumpen die Lymphe durch Kontraktion weiter", correct: true }, { text: "Sie filtern Krankheitserreger aus der Lymphe", correct: false }, { text: "Sie produzieren Lymphozyten", correct: false }, { text: "Sie verbinden das Lymphsystem mit dem Blutkreislauf", correct: false } ], explanation: "Die Angione (Abschnitte zwischen den Klappen) kontrahieren wie das Herz in regelmäßigen Abständen und pressen so die Lymphe weiter." },
+            { question: "Aus welchen vier Haupthohlräumen besteht das Herz?", answers: [ { text: "Zwei Vorhöfe (Atrien) und zwei Kammern (Ventrikel)", correct: true }, { text: "Aorta, Lungenarterie, obere und untere Hohlvene", correct: false }, { text: "Endokard, Myokard, Epikard und Perikard", correct: false }, { text: "Linke und rechte Lunge, linker und rechter Vorhof", correct: false } ], explanation: "Das Herz besteht aus zwei Kammern/Ventrikeln (unten) und zwei Vorhöfen/Atrien (oben), die jeweils durch eine Herzscheidewand (Septum) voneinander getrennt sind." },
+            { question: "Welche Aussage über den Wandaufbau von Arterien und Venen ist korrekt?", answers: [ { text: "Arterien haben eine dickere Muskelschicht als Venen", correct: true }, { text: "Venen haben eine dickere Muskelschicht als Arterien", correct: false }, { text: "Nur Arterien bestehen aus drei Wandschichten", correct: false }, { text: "Nur Venen besitzen eine innere Endothelschicht", correct: false } ], explanation: "Beide Gefäßtypen besitzen drei Wandschichten. Arterien haben jedoch eine besonders dicke Muskelfaserschicht (Tunica media), um dem hohen Druck standzuhalten, während sie bei Venen deutlich dünner ist." }
         ];
-
 
         const startBtn = document.getElementById('start-btn');
         const nextBtn = document.getElementById('next-btn');
@@ -554,6 +160,7 @@
         const questionText = document.getElementById('question-text');
         const answerButtons = document.getElementById('answer-buttons');
         const explanationContainer = document.getElementById('explanation-container');
+        const explanationTitle = document.getElementById('explanation-title');
         const explanationText = document.getElementById('explanation-text');
         
         const questionNumberEl = document.getElementById('question-number');
@@ -563,6 +170,14 @@
 
         let currentQuestionIndex = 0;
         let score = 0;
+        
+        // Function to shuffle an array (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
         startBtn.addEventListener('click', startQuiz);
         nextBtn.addEventListener('click', () => {
@@ -584,6 +199,8 @@
             currentQuestionIndex = 0;
             score = 0;
             updateScore();
+            // Shuffle the entire quiz data for a new question order each time
+            shuffleArray(quizData);
             showQuestion();
         }
 
@@ -594,11 +211,15 @@
             questionText.innerText = question.question;
             
             updateProgressBar();
+            
+            // Shuffle answers for the current question
+            shuffleArray(question.answers);
 
-            question.answers.forEach(answer => {
+            const letters = ['A', 'B', 'C', 'D'];
+            question.answers.forEach((answer, index) => {
                 const button = document.createElement('button');
-                button.innerText = answer.text;
-                button.classList.add('answer-btn', 'w-full', 'p-4', 'text-left', 'bg-white', 'border', 'border-slate-300', 'rounded-lg', 'hover:bg-slate-50', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-400');
+                button.innerHTML = `<p class="font-semibold text-slate-800">${letters[index]}. ${answer.text}</p>`;
+                button.classList.add('answer-btn', 'w-full', 'p-4', 'text-left', 'bg-white', 'border', 'border-slate-200', 'rounded-lg', 'hover:bg-slate-50', 'focus:outline-none', 'focus:ring-2', 'focus:ring-sky-400', 'shadow-sm');
                 if (answer.correct) {
                     button.dataset.correct = answer.correct;
                 }
@@ -625,16 +246,29 @@
         }
 
         function selectAnswer(e) {
-            const selectedBtn = e.target;
+            const selectedBtn = e.currentTarget; // Use currentTarget to ensure the button is selected
             const isCorrect = selectedBtn.dataset.correct === 'true';
 
             if (isCorrect) {
                 score++;
                 updateScore();
+                explanationTitle.innerHTML = `<svg class="w-6 h-6 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Richtig!`;
+                explanationTitle.classList.remove('text-rose-500');
+                explanationTitle.classList.add('text-emerald-500');
+                explanationContainer.style.borderColor = '#10b981';
+            } else {
+                explanationTitle.innerHTML = `<svg class="w-6 h-6 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Falsch.`;
+                explanationTitle.classList.remove('text-emerald-500');
+                explanationTitle.classList.add('text-rose-500');
+                explanationContainer.style.borderColor = '#f43f5e';
             }
 
             Array.from(answerButtons.children).forEach(button => {
-                setStatusClass(button, button.dataset.correct === 'true');
+                if(button.dataset.correct === 'true') {
+                   setStatusClass(button, true);
+                } else if (button === selectedBtn) {
+                   setStatusClass(button, false);
+                }
                 button.classList.add('disabled');
             });
             
@@ -666,3 +300,5 @@
     </script>
 </body>
 </html>
+
+ 
